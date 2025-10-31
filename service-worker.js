@@ -62,7 +62,7 @@ self.addEventListener('fetch', event => {
 
         // Clone and store safe responses
         const responseClone = response.clone();
-        caches.open('v1').then(cache => {
+        caches.open('my-cache-v1').then(cache => {
           cache.put(request, responseClone).catch(err => {
             console.error('Failed to cache fetch response:', err);
           });
