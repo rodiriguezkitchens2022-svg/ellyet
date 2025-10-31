@@ -4,7 +4,7 @@ self.addEventListener('install', (event) => {
     '/',
     '/index.html',
     '/styles.css',
-    '/images/icons-192.png',
+    '/icons-192.png',
   ];
 
   event.waitUntil(
