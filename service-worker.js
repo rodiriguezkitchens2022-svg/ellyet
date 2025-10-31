@@ -1,18 +1,31 @@
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
+  const CACHE_NAME = 'my-cache-v1';
+  const urlsToCache = [
+    '/',
+    '/index.html',
+    '/styles.css',
+    '/images/icons-192.png',
+  ];
+
   event.waitUntil(
-    caches.open('v1').then(cache => {
-      return cache.addAll([
-        '/mrd0x.html',
-        '/index.html',
-        '/manifest.json',
-        '/styles.css',
-        '/images/icons-192.png'
-      ]).catch(error => {
-        console.error('Failed to cache resources during install:', error);
-      });
-    }).then(() => {
-      // Activate this SW immediately
-      return self.skipWaiting();
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const results = await Promise.allSettled(
+        urlsToCache.map(async (url) => {
+          try {
+            const res = await fetch(url, { cache: 'no-store' });
+            if (!res.ok) throw new Error(`Failed ${res.status} ${url}`);
+            await cache.put(url, res.clone());
+            return { url, status: 'fulfilled' };
+          } catch (err) {
+            return { url, status: 'rejected', reason: String(err) };
+          }
+        })
+      );
+
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length) {
+        console.warn('Some resources failed to cache during install:', failed);
+      }
     })
   );
 });
